@@ -1,0 +1,920 @@
+{
+  "name": "LinkedIn Jobs - AI Fit Scoring + Telegram",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "27f12a6b-63cb-42d5-a9b6-b2e2187f8e31",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        260,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "af3d3a8b-df0e-49eb-9807-fb0566f14ec6",
+      "name": "Every Hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        260,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Searches LinkedIn guest jobs using configurable keywords, location, recency, and remote filters. An AI agent merges same-company same-role postings, fetches the job detail page, extracts About the job, scores each new opportunity against candidateProfile, and sends roles with fit score >= minFitScore to Telegram. Optional Easy Apply handoff nodes are disabled by default and require a separate local browser assistant.",
+        "height": 420,
+        "width": 560
+      },
+      "id": "95be7be2-c725-4d48-9974-e8e1f4d8d76b",
+      "name": "Workflow Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-keywords",
+              "name": "keywords",
+              "value": "AI automation",
+              "type": "string"
+            },
+            {
+              "id": "cfg-location",
+              "name": "location",
+              "value": "Worldwide",
+              "type": "string"
+            },
+            {
+              "id": "cfg-posted-seconds",
+              "name": "postedSeconds",
+              "value": 86400,
+              "type": "number"
+            },
+            {
+              "id": "cfg-remote-work-type",
+              "name": "remoteWorkType",
+              "value": "2",
+              "type": "string"
+            },
+            {
+              "id": "cfg-page-size",
+              "name": "pageSize",
+              "value": 25,
+              "type": "number"
+            },
+            {
+              "id": "cfg-max-pages",
+              "name": "maxPages",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-sort",
+              "name": "sortBy",
+              "value": "DD",
+              "type": "string"
+            },
+            {
+              "id": "cfg-search-url",
+              "name": "searchUrl",
+              "value": "https://www.linkedin.com/jobs/search/",
+              "type": "string"
+            },
+            {
+              "id": "cfg-user-agent",
+              "name": "userAgent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+              "type": "string"
+            },
+            {
+              "id": "cfg-accept-language",
+              "name": "acceptLanguage",
+              "value": "en-US,en;q=0.9",
+              "type": "string"
+            },
+            {
+              "id": "cfg-candidate-profile",
+              "name": "candidateProfile",
+              "value": "Your Name\nTarget Role: AI Automation Specialist\nLocation: Remote / Your preferred regions\nContact: your-email@example.com | LinkedIn: https://www.linkedin.com/in/your-profile/\nProfessional Summary\nAutomation-focused professional with hands-on experience building workflow automations, AI-assisted operations, and low-code integrations. Strongest fit is for roles involving n8n, AI agents, workflow orchestration, process improvement, and business automation.\nCore Skills\nn8n, AI automation, workflow automation, low-code tools, prompt engineering, tool orchestration, API integrations, CRM automation, operations automation, support automation, process optimization\nProfessional Experience\nAutomation Specialist | Example Company\nBuilt workflow automations that reduced repetitive manual work and improved operational response time.\nIntegrated AI tools into business processes across marketing, operations, customer support, and internal reporting.\nCollaborated with non-technical teams to translate business requirements into reliable automations.\nRole Focus\nAI Automation Specialist, n8n Workflow Builder, Automation Engineer, Operations Automation Specialist",
+              "type": "string"
+            },
+            {
+              "id": "cfg-min-fit-score",
+              "name": "minFitScore",
+              "value": 7,
+              "type": "number"
+            },
+            {
+              "id": "cfg-telegram-chat-id",
+              "name": "telegramChatId",
+              "value": "YOUR_TELEGRAM_CHAT_ID",
+              "type": "string"
+            },
+            {
+              "id": "cfg-easy-apply-enabled",
+              "name": "easyApplyEnabled",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-easy-apply-webhook-url",
+              "name": "easyApplyWebhookUrl",
+              "value": "https://your-public-tunnel.example/easy-apply/tasks",
+              "type": "string"
+            },
+            {
+              "id": "cfg-easy-apply-handoff-secret",
+              "name": "easyApplyHandoffSecret",
+              "value": "YOUR_EASY_APPLY_HANDOFF_SECRET",
+              "type": "string"
+            },
+            {
+              "id": "cfg-easy-apply-status-callback-secret",
+              "name": "easyApplyStatusCallbackSecret",
+              "value": "YOUR_EASY_APPLY_STATUS_CALLBACK_SECRET",
+              "type": "string"
+            },
+            {
+              "id": "cfg-easy-apply-mode",
+              "name": "easyApplyMode",
+              "value": "fill_and_confirm",
+              "type": "string"
+            },
+            {
+              "id": "cfg-cv-path",
+              "name": "cvPath",
+              "value": "C:\\path\\to\\your\\resume.docx",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "e1703e0d-a516-4ca3-a1d8-f2479cc3ad07",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        520,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const config = $input.first().json;\nconst candidateProfile = String(config.candidateProfile ?? '').trim();\nif (!candidateProfile) {\n  throw new Error('Workflow Configuration candidateProfile is required. Paste your resume/profile text before running the workflow.');\n}\n\nconst maxPages = Math.max(1, Number(config.maxPages ?? 8));\nconst pageSize = Math.max(1, Number(config.pageSize ?? 25));\nconst minFitScoreRaw = Number(config.minFitScore ?? 7);\nconst minFitScore = Number.isFinite(minFitScoreRaw)\n  ? Math.min(10, Math.max(1, Math.round(minFitScoreRaw)))\n  : 7;\nconst output = [];\n\nfor (let pageIndex = 0; pageIndex < maxPages; pageIndex++) {\n  output.push({\n    json: {\n      ...config,\n      candidateProfile,\n      minFitScore,\n      pageIndex,\n      start: pageIndex * pageSize,\n      fetchedAt: new Date().toISOString(),\n    },\n  });\n}\n\nreturn output;"
+      },
+      "id": "da22e7ee-4e54-4d8b-bc9f-5d0c548c0df3",
+      "name": "Build Page Requests",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.searchUrl }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "keywords",
+              "value": "={{ $json.keywords }}"
+            },
+            {
+              "name": "location",
+              "value": "={{ $json.location }}"
+            },
+            {
+              "name": "f_TPR",
+              "value": "={{ 'r' + $json.postedSeconds }}"
+            },
+            {
+              "name": "f_WT",
+              "value": "={{ $json.remoteWorkType }}"
+            },
+            {
+              "name": "sortBy",
+              "value": "={{ $json.sortBy }}"
+            },
+            {
+              "name": "start",
+              "value": "={{ String($json.start) }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "={{ $json.userAgent }}"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "={{ $json.acceptLanguage }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "text",
+              "outputPropertyName": "html"
+            }
+          }
+        }
+      },
+      "id": "f2c294e7-2917-49df-a446-08fa5eeed8cb",
+      "name": "Fetch LinkedIn Search Pages",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1020,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const decodeHtml = (value = '') => value\n  .replace(/&amp;/g, '&')\n  .replace(/&quot;/g, '\"')\n  .replace(/&#39;/g, \"'\")\n  .replace(/&#x27;/gi, \"'\")\n  .replace(/&#x2F;/gi, '/')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&nbsp;/g, ' ')\n  .trim();\n\nconst cleanText = (value = '') => decodeHtml(value).replace(/\\s+/g, ' ').trim();\nconst stripTags = (value = '') => cleanText(value.replace(/<[^>]+>/g, ' '));\nconst seenInRun = new Set();\nconst jobs = [];\n\nfor (const item of $input.all()) {\n  const html = item.json.html || '';\n  const pageIndex = Number(item.json.pageIndex ?? 0);\n  const start = Number(item.json.start ?? 0);\n  const cards = html.split('<div class=\"base-card relative').slice(1);\n\n  for (const cardPart of cards) {\n    const card = `<div class=\"base-card relative${cardPart}`;\n    const jobId = card.match(/data-entity-urn=\"urn:li:jobPosting:(\\d+)\"/)?.[1];\n    const jobUrlRaw = card.match(/class=\"base-card__full-link[\\s\\S]*?href=\"([^\"]+)\"/)?.[1];\n    const titleRaw = card.match(/<h3 class=\"base-search-card__title\">([\\s\\S]*?)<\\/h3>/)?.[1];\n    const companyRaw = card.match(/<h4 class=\"base-search-card__subtitle\">[\\s\\S]*?<a[^>]*>([\\s\\S]*?)<\\/a>/)?.[1];\n    const locationRaw = card.match(/<span class=\"job-search-card__location\">([\\s\\S]*?)<\\/span>/)?.[1];\n    const postedDate = card.match(/<time class=\"job-search-card__listdate(?:--new)?[^\"]*\" datetime=\"([^\"]+)\"/)?.[1] ?? null;\n    const postedTextRaw = card.match(/<time class=\"job-search-card__listdate(?:--new)?[^\"]*\"[^>]*>([\\s\\S]*?)<\\/time>/)?.[1];\n\n    const title = stripTags(titleRaw || '');\n    const company = stripTags(companyRaw || '');\n    const location = stripTags(locationRaw || '');\n    const postedText = stripTags(postedTextRaw || '');\n    const jobUrl = decodeHtml(jobUrlRaw || '');\n    const canonicalJobUrl = jobUrl ? jobUrl.split('?')[0] : '';\n    const dedupeKey = jobId || canonicalJobUrl;\n\n    if (!dedupeKey || !title || !canonicalJobUrl) continue;\n    if (seenInRun.has(dedupeKey)) continue;\n\n    seenInRun.add(dedupeKey);\n    jobs.push({\n      json: {\n        jobId,\n        title,\n        company,\n        location,\n        postedDate,\n        postedText,\n        jobUrl: canonicalJobUrl,\n        keywords: item.json.keywords,\n        locationFilter: item.json.location,\n        remoteFilter: true,\n        postedWithinSeconds: Number(item.json.postedSeconds),\n        pageIndex,\n        start,\n        fetchedAt: item.json.fetchedAt,\n        source: 'LinkedIn Jobs Guest Search'\n      }\n    });\n  }\n}\n\njobs.sort((a, b) => {\n  const aTime = a.json.postedDate ? Date.parse(a.json.postedDate) : 0;\n  const bTime = b.json.postedDate ? Date.parse(b.json.postedDate) : 0;\n  if (aTime !== bTime) return bTime - aTime;\n  return a.json.pageIndex - b.json.pageIndex;\n});\n\nreturn jobs;"
+      },
+      "id": "8b5b8bf5-8b08-4d46-b881-414f5b49e8ae",
+      "name": "Extract Job Cards",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const jobs = $input.all().map(item => item.json);\nreturn [\n  {\n    json: {\n      jobCount: jobs.length,\n      detectedAt: new Date().toISOString(),\n      jobs,\n      jobsPayload: JSON.stringify(jobs, null, 2),\n    },\n  },\n];"
+      },
+      "id": "5c77435e-4050-426d-9326-e7efe6ea9724",
+      "name": "Prepare Jobs For AI Deduplication",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.jobsPayload }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a LinkedIn job deduplication agent.\n\nYou receive a JSON array of LinkedIn remote job postings for the configured search keywords and recency window.\n\nYour task:\n1. Merge postings that are clearly the same opportunity repeated by the same company across multiple regions or countries.\n2. Keep separate postings when titles materially differ, even if the company is the same.\n3. Be conservative: if unsure, keep items separate rather than over-merging.\n4. For merged opportunities, keep the best title, aggregate all distinct regions, aggregate all distinct job URLs, and set duplicateCount to the number of merged postings.\n5. canonicalKey must be stable and lowercase, based on normalized company + normalized role, for example `kraken|client engagement data analyst ai`.\n6. reasoning should briefly explain why postings were merged or why the title was chosen.\n7. Return only the structured data required by the output parser.\n\nDo not invent jobs, links, companies, or regions. Use only the provided input."
+        }
+      },
+      "id": "4bb4c275-0d17-4808-bf1b-92f591781c80",
+      "name": "AI Deduplicate Jobs",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1810,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        }
+      },
+      "id": "7b8fb41a-11d7-46af-80c0-e72dbed55d3d",
+      "name": "OpenAI GPT-4o-mini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1810,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"jobs\": {\n      \"type\": \"array\",\n      \"description\": \"Deduplicated LinkedIn opportunities after merging same-company same-role cross-region postings.\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"canonicalKey\": {\n            \"type\": \"string\",\n            \"description\": \"Stable lowercase dedupe key based on normalized company and normalized role.\"\n          },\n          \"title\": {\n            \"type\": \"string\",\n            \"description\": \"Representative job title for the merged opportunity.\"\n          },\n          \"company\": {\n            \"type\": \"string\",\n            \"description\": \"Company name.\"\n          },\n          \"regions\": {\n            \"type\": \"array\",\n            \"description\": \"All distinct locations or regions merged into this opportunity.\",\n            \"items\": {\n              \"type\": \"string\"\n            }\n          },\n          \"primaryLocation\": {\n            \"type\": \"string\",\n            \"description\": \"Best single display location for the merged opportunity.\"\n          },\n          \"postedDate\": {\n            \"type\": \"string\",\n            \"description\": \"Representative posting date in ISO date format when available.\"\n          },\n          \"postedText\": {\n            \"type\": \"string\",\n            \"description\": \"Representative human-readable posted age such as 13 hours ago.\"\n          },\n          \"jobUrls\": {\n            \"type\": \"array\",\n            \"description\": \"All distinct LinkedIn job URLs belonging to this merged opportunity.\",\n            \"items\": {\n              \"type\": \"string\"\n            }\n          },\n          \"duplicateCount\": {\n            \"type\": \"number\",\n            \"description\": \"How many raw postings were merged into this single opportunity.\"\n          },\n          \"reasoning\": {\n            \"type\": \"string\",\n            \"description\": \"Short explanation of the merge decision.\"\n          }\n        }\n      }\n    }\n  }\n}",
+        "autoFix": false
+      },
+      "id": "5dcc3ef3-674b-48b6-a4a8-f4d47963f936",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1810,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const rawJobCount = Number($('Prepare Jobs For AI Deduplication').first().json.jobCount || 0);\n\nconst parseMaybeJson = (value) => {\n  if (typeof value !== 'string') return value;\n  const trimmed = value.trim();\n  if (!trimmed) return value;\n\n  try {\n    return JSON.parse(trimmed);\n  } catch {\n    return value;\n  }\n};\n\nconst findJobsArray = (value, depth = 0, seen = new Set()) => {\n  if (depth > 8 || value == null) return null;\n\n  const parsed = parseMaybeJson(value);\n  if (Array.isArray(parsed)) return parsed;\n  if (!parsed || typeof parsed !== 'object') return null;\n  if (seen.has(parsed)) return null;\n\n  seen.add(parsed);\n\n  if (Array.isArray(parsed.jobs)) return parsed.jobs;\n\n  for (const key of ['output', 'response', 'data', 'result']) {\n    const nested = findJobsArray(parsed[key], depth + 1, seen);\n    if (Array.isArray(nested)) return nested;\n  }\n\n  return null;\n};\n\nconst groups = findJobsArray($json) ?? [];\nif (rawJobCount > 0 && groups.length === 0) {\n  throw new Error('AI Deduplicate Jobs returned no usable jobs array. Check the AI node output and look for a JSON string in output/output.jobs.');\n}\n\nconst normalizeText = (value = '') => String(value).trim();\nconst makeKey = (company, title) => `${normalizeText(company).toLowerCase()}|${normalizeText(title).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()}`;\n\nreturn groups.map((group, index) => {\n  const company = normalizeText(group.company || 'Unknown company');\n  const title = normalizeText(group.title || 'Unknown role');\n  const regions = Array.from(new Set((Array.isArray(group.regions) ? group.regions : [])\n    .map(value => normalizeText(value))\n    .filter(Boolean)));\n  const jobUrls = Array.from(new Set((Array.isArray(group.jobUrls) ? group.jobUrls : [])\n    .map(value => String(value).trim())\n    .filter(Boolean)));\n  const duplicateCount = Number(group.duplicateCount || jobUrls.length || regions.length || 1);\n\n  return {\n    json: {\n      canonicalKey: normalizeText(group.canonicalKey || makeKey(company, title)),\n      company,\n      title,\n      regions,\n      primaryLocation: normalizeText(group.primaryLocation || regions[0] || 'Worldwide'),\n      postedDate: normalizeText(group.postedDate || ''),\n      postedText: normalizeText(group.postedText || ''),\n      jobUrls,\n      duplicateCount,\n      reasoning: normalizeText(group.reasoning || ''),\n      source: 'LinkedIn Jobs Guest Search',\n      searchTerm: $('Workflow Configuration').first().json.keywords,\n      remoteFilter: true,\n      detectedAt: $('Prepare Jobs For AI Deduplication').first().json.detectedAt,\n      agentIndex: index\n    }\n  };\n});"
+      },
+      "id": "0f0aa14e-27ff-4d28-88ef-1ed30f2f15e6",
+      "name": "Expand AI Deduped Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2070,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const now = Date.now();\nconst retentionMs = 30 * 24 * 60 * 60 * 1000;\nconst staticData = $getWorkflowStaticData('global');\nconst seenOpportunities = staticData.seenOpportunities || {};\n\nfor (const [key, timestamp] of Object.entries(seenOpportunities)) {\n  if (!timestamp || Number(timestamp) < now - retentionMs) {\n    delete seenOpportunities[key];\n  }\n}\n\nconst freshItems = [];\nfor (const item of $input.all()) {\n  const key = item.json.canonicalKey;\n  if (!key) continue;\n  if (seenOpportunities[key]) continue;\n\n  seenOpportunities[key] = now;\n  freshItems.push({\n    json: {\n      ...item.json,\n      isNewSinceLastRun: true,\n      alertDetectedAt: new Date(now).toISOString()\n    }\n  });\n}\n\nstaticData.seenOpportunities = seenOpportunities;\nreturn freshItems;"
+      },
+      "id": "c79273bb-77eb-4485-98a8-db9804bcb120",
+      "name": "Keep Only Newly Seen Opportunities",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2330,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ ($json.jobUrls && $json.jobUrls[0]) || \"https://www.linkedin.com/jobs/search/\" }}",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "={{ $json.userAgent || $('Workflow Configuration').first().json.userAgent }}"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "={{ $json.acceptLanguage || $('Workflow Configuration').first().json.acceptLanguage }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "text",
+              "outputPropertyName": "jobDetailHtml"
+            }
+          }
+        }
+      },
+      "id": "dfe47085-72d9-4918-8d8e-c6265a2e3df8",
+      "name": "Fetch Job Detail Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2590,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const decodeHtml = (value = '') => String(value)\n  .replace(/&amp;/g, '&')\n  .replace(/&quot;/g, '\"')\n  .replace(/&#39;/g, \"'\")\n  .replace(/&#x27;/gi, \"'\")\n  .replace(/&#x2F;/gi, '/')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&nbsp;/g, ' ')\n  .trim();\n\nconst sourceItems = $('Keep Only Newly Seen Opportunities').all();\n\nconst extractAboutHtml = (html = '') => {\n  if (!html) return '';\n\n  const patterns = [\n    /<div class=\"show-more-less-html__markup[^\"]*\"[^>]*>([\\s\\S]*?)<\\/div>/i,\n    /<section[^>]*class=\"show-more-less-html[^\"]*\"[\\s\\S]*?<div class=\"show-more-less-html__markup[^\"]*\"[^>]*>([\\s\\S]*?)<\\/div>[\\s\\S]*?<\\/section>/i,\n    /<div class=\"description__text[^\"]*\"[^>]*>([\\s\\S]*?)<\\/div>/i,\n  ];\n\n  for (const pattern of patterns) {\n    const match = html.match(pattern);\n    if (match?.[1]) return match[1].trim();\n  }\n\n  return '';\n};\n\nconst stripTags = (value = '') => decodeHtml(\n  String(value)\n    .replace(/<br\\s*\\/?\\s*>/gi, '\\n')\n    .replace(/<\\/p>/gi, '\\n')\n    .replace(/<\\/li>/gi, '\\n')\n    .replace(/<li[^>]*>/gi, '- ')\n    .replace(/<[^>]+>/g, ' ')\n)\n  .replace(/\\r/g, '')\n  .replace(/[ \\t]+\\n/g, '\\n')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .replace(/[ \\t]{2,}/g, ' ')\n  .trim();\n\nreturn $input.all().map((item, index) => {\n  const source = sourceItems[index]?.json || {};\n  const jobDetailHtml = String(item.json.jobDetailHtml || '');\n  const aboutTheJobHtml = extractAboutHtml(jobDetailHtml);\n  const aboutTheJobText = stripTags(aboutTheJobHtml);\n\n  return {\n    json: {\n      ...source,\n      jobDetailHtml,\n      aboutTheJobHtml,\n      aboutTheJobText,\n      aboutTheJobFound: Boolean(aboutTheJobText),\n    },\n  };\n});"
+      },
+      "id": "4bc52c45-079a-462f-8198-353f6f8d3cb2",
+      "name": "Extract About the Job",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2850,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify({ candidateProfile: $('Workflow Configuration').first().json.candidateProfile, job: { title: $json.title, company: $json.company, regions: $json.regions || [], primaryLocation: $json.primaryLocation || '', postedDate: $json.postedDate || '', postedText: $json.postedText || '', duplicateCount: $json.duplicateCount || 1, aboutTheJobText: $json.aboutTheJobText || '', aboutTheJobFound: Boolean($json.aboutTheJobText), jobUrls: ($json.jobUrls || []).slice(0, 3) } }, null, 2) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an AI job-fit scoring agent for a specific candidate.\n\nScore each job from 1 to 10 using candidateProfile as the main source of truth.\n\nSignals that often score highest when they match the candidate profile:\n- n8n, AI automation, workflow automation, no-code or low-code tools\n- AI agents, prompt-driven automation, tool orchestration, integrations\n- automation specialist, automation engineer, integration builder, operations automation\n\nSignals that often score lower unless the candidate profile strongly supports them:\n- coding-heavy software engineering\n- backend engineering, frontend engineering, full-stack engineering\n- Python-heavy implementation, React, production software architecture\n- strong software engineering ownership, deep coding, ML engineering\n\nRubric:\n- 9-10: very strong match for the candidate's target tools, skills, and role focus\n- 7-8: mostly aligned role where gaps are minor or optional\n- 5-6: mixed fit with meaningful skill or responsibility gaps\n- 3-4: weak fit, mostly outside the candidate's preferred focus\n- 1-2: poor fit or clearly unrelated role\n\nRules:\n1. Use title, company, regions, and aboutTheJobText.\n2. If aboutTheJobText is empty, score conservatively from the remaining evidence and do not score above 7 unless the role is clearly aligned.\n3. Down-rank roles that emphasize responsibilities missing from candidateProfile.\n4. Do not reward generic AI language if the actual role is mostly unrelated.\n5. If evidence is mixed, choose the lower score.\n6. fitScore must be an integer from 1 to 10.\n7. fitBand must be one of: excellent, good, mixed, engineering-heavy, not-fit.\n8. fitSummary must be one short English sentence suitable for Telegram.\n9. scoringReason must be a short internal English explanation.\n10. Return only the structured data required by the output parser."
+        }
+      },
+      "id": "17458a26-c93d-4a8a-ba88-5c46b3252695",
+      "name": "AI Score Job Fit",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        3110,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        }
+      },
+      "id": "b7798bc8-8e54-4a56-9367-f1959bff6db2",
+      "name": "OpenAI GPT-4o-mini (Scoring)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        3110,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"fitScore\": {\n      \"type\": \"number\",\n      \"description\": \"Integer from 1 to 10 describing how well the job fits the candidate profile.\"\n    },\n    \"fitBand\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"excellent\",\n        \"good\",\n        \"mixed\",\n        \"engineering-heavy\",\n        \"not-fit\"\n      ],\n      \"description\": \"Band label for the fit score.\"\n    },\n    \"fitSummary\": {\n      \"type\": \"string\",\n      \"description\": \"One short English sentence suitable for Telegram explaining the fit.\"\n    },\n    \"scoringReason\": {\n      \"type\": \"string\",\n      \"description\": \"Short internal explanation of the scoring decision.\"\n    }\n  },\n  \"required\": [\n    \"fitScore\",\n    \"fitBand\",\n    \"fitSummary\",\n    \"scoringReason\"\n  ]\n}",
+        "autoFix": false
+      },
+      "id": "3ca7a2a6-8ee3-48f2-a057-bbde1cd4d8bf",
+      "name": "Structured Output Parser (Scoring)",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        3110,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const sourceItems = $('Extract About the Job').all();\nconst minFitScoreRaw = Number($('Workflow Configuration').first().json.minFitScore ?? 7);\nconst minFitScore = Number.isFinite(minFitScoreRaw)\n  ? Math.min(10, Math.max(1, Math.round(minFitScoreRaw)))\n  : 7;\n\nconst parseMaybeJson = (value) => {\n  if (typeof value !== 'string') return value;\n  const trimmed = value.trim();\n  if (!trimmed) return value;\n\n  try {\n    return JSON.parse(trimmed);\n  } catch {\n    return value;\n  }\n};\n\nconst findScoreObject = (value, depth = 0, seen = new Set()) => {\n  if (depth > 8 || value == null) return null;\n\n  const parsed = parseMaybeJson(value);\n\n  if (Array.isArray(parsed)) {\n    for (const entry of parsed) {\n      const nested = findScoreObject(entry, depth + 1, seen);\n      if (nested) return nested;\n    }\n    return null;\n  }\n\n  if (!parsed || typeof parsed !== 'object') return null;\n  if (seen.has(parsed)) return null;\n\n  if (parsed.fitScore != null) return parsed;\n\n  seen.add(parsed);\n\n  for (const key of ['output', 'response', 'data', 'result', 'content']) {\n    const nested = findScoreObject(parsed[key], depth + 1, seen);\n    if (nested) return nested;\n  }\n\n  for (const value of Object.values(parsed)) {\n    const nested = findScoreObject(value, depth + 1, seen);\n    if (nested) return nested;\n  }\n\n  return null;\n};\n\nconst normalizeText = (value = '') => String(value).trim();\nconst allowedBands = new Set(['excellent', 'good', 'mixed', 'engineering-heavy', 'not-fit']);\nconst makeBand = (score) => {\n  if (score >= 9) return 'excellent';\n  if (score >= 7) return 'good';\n  if (score >= 5) return 'mixed';\n  if (score >= 3) return 'engineering-heavy';\n  return 'not-fit';\n};\nconst fullBlock = String.fromCharCode(9608);\nconst lightBlock = String.fromCharCode(9617);\nconst makeBar = (score) => `${fullBlock.repeat(score)}${lightBlock.repeat(10 - score)}`;\n\nreturn $input.all().map((item, index) => {\n  const source = sourceItems[index]?.json || {};\n  const scoreObject = findScoreObject(item.json);\n\n  if (!scoreObject) {\n    throw new Error(`AI Score Job Fit returned no usable fit score for item ${index + 1}.`);\n  }\n\n  const fitScoreValue = Math.round(Number(scoreObject.fitScore));\n  if (!Number.isFinite(fitScoreValue)) {\n    throw new Error(`AI Score Job Fit returned an invalid fitScore for item ${index + 1}.`);\n  }\n\n  const fitScore = Math.min(10, Math.max(1, fitScoreValue));\n  const fitBandRaw = normalizeText(scoreObject.fitBand).toLowerCase();\n  const fitBand = allowedBands.has(fitBandRaw) ? fitBandRaw : makeBand(fitScore);\n  const fitSummary = normalizeText(scoreObject.fitSummary || (fitScore >= minFitScore\n    ? 'Strong automation fit for your profile.'\n    : 'Role looks too engineering-heavy for your profile.'));\n  const scoringReason = normalizeText(scoreObject.scoringReason || 'No scoring reason returned.');\n\n  return {\n    json: {\n      ...source,\n      fitScore,\n      fitBand,\n      fitSummary,\n      scoringReason,\n      fitScoreBar: makeBar(fitScore),\n      minFitScore,\n      passesFitScore: fitScore >= minFitScore,\n    },\n  };\n}).filter((item) => item.json.passesFitScore);"
+      },
+      "id": "a8ae4b8e-395e-4a44-ac1f-b6c6aa2cf13d",
+      "name": "Normalize And Filter Fit Scores",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3370,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const escapeHtml = (value = '') => String(value)\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;')\n  .replace(/\"/g, '&quot;')\n  .replace(/'/g, '&#39;');\n\nconst escapeUrl = (value = '') => String(value)\n  .replace(/&/g, '&amp;')\n  .replace(/\"/g, '&quot;');\n\nconst ICONS = {\n  alert: String.fromCodePoint(0x1F680),\n  role: String.fromCodePoint(0x1F4BC),\n  company: String.fromCodePoint(0x1F3E2),\n  fit: String.fromCodePoint(0x2B50),\n  note: String.fromCodePoint(0x1F4AC),\n  regions: String.fromCodePoint(0x1F30D),\n  links: String.fromCodePoint(0x1F517),\n  posted: String.fromCodePoint(0x23F0),\n  date: String.fromCodePoint(0x1F4C5),\n  dedupe: String.fromCodePoint(0x1F9E0),\n  search: String.fromCodePoint(0x1F50D),\n  filter: String.fromCodePoint(0x1F3AF),\n  window: String.fromCodePoint(0x1F552),\n};\n\nconst countryHints = {\n  argentina: 'AR',\n  australia: 'AU',\n  austria: 'AT',\n  belgium: 'BE',\n  brazil: 'BR',\n  bulgaria: 'BG',\n  canada: 'CA',\n  chile: 'CL',\n  colombia: 'CO',\n  croatia: 'HR',\n  cyprus: 'CY',\n  czechia: 'CZ',\n  'czech republic': 'CZ',\n  denmark: 'DK',\n  egypt: 'EG',\n  estonia: 'EE',\n  finland: 'FI',\n  france: 'FR',\n  germany: 'DE',\n  greece: 'GR',\n  hungary: 'HU',\n  india: 'IN',\n  indonesia: 'ID',\n  ireland: 'IE',\n  israel: 'IL',\n  italy: 'IT',\n  japan: 'JP',\n  kenya: 'KE',\n  latvia: 'LV',\n  lithuania: 'LT',\n  luxembourg: 'LU',\n  malaysia: 'MY',\n  mexico: 'MX',\n  morocco: 'MA',\n  netherlands: 'NL',\n  'new zealand': 'NZ',\n  nigeria: 'NG',\n  norway: 'NO',\n  pakistan: 'PK',\n  peru: 'PE',\n  philippines: 'PH',\n  poland: 'PL',\n  portugal: 'PT',\n  romania: 'RO',\n  'saudi arabia': 'SA',\n  serbia: 'RS',\n  singapore: 'SG',\n  slovakia: 'SK',\n  slovenia: 'SI',\n  'south africa': 'ZA',\n  'south korea': 'KR',\n  korea: 'KR',\n  spain: 'ES',\n  sweden: 'SE',\n  switzerland: 'CH',\n  thailand: 'TH',\n  turkey: 'TR',\n  ukraine: 'UA',\n  'united arab emirates': 'AE',\n  uae: 'AE',\n  'united kingdom': 'GB',\n  uk: 'GB',\n  'great britain': 'GB',\n  england: 'GB',\n  'united states': 'US',\n  usa: 'US',\n  vietnam: 'VN',\n};\n\nconst usStateCodes = new Set([\n  'al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'dc', 'de', 'fl', 'ga', 'hi', 'ia', 'id', 'il', 'in',\n  'ks', 'ky', 'la', 'ma', 'md', 'me', 'mi', 'mn', 'mo', 'ms', 'mt', 'nc', 'nd', 'ne', 'nh', 'nj',\n  'nm', 'nv', 'ny', 'oh', 'ok', 'or', 'pa', 'ri', 'sc', 'sd', 'tn', 'tx', 'ut', 'va', 'vt', 'wa',\n  'wi', 'wv', 'wy',\n]);\n\nconst toFlagEmoji = (countryCode = '') => {\n  const normalized = String(countryCode).trim().toUpperCase();\n  if (!/^[A-Z]{2}$/.test(normalized)) return '';\n  return Array.from(normalized)\n    .map((char) => String.fromCodePoint(127397 + char.charCodeAt(0)))\n    .join('');\n};\n\nconst detectCountryCode = (value = '') => {\n  const normalized = String(value).trim().toLowerCase();\n  if (!normalized) return '';\n\n  for (const [hint, code] of Object.entries(countryHints)) {\n    if (normalized.includes(hint)) return code;\n  }\n\n  const parts = normalized.split(',').map((part) => part.trim()).filter(Boolean);\n  const lastPart = parts[parts.length - 1] || '';\n\n  if (countryHints[lastPart]) return countryHints[lastPart];\n  if (usStateCodes.has(lastPart)) return 'US';\n\n  return '';\n};\n\nconst formatRegion = (value = '') => {\n  const safeRegion = escapeHtml(value);\n  const flag = toFlagEmoji(detectCountryCode(value));\n  return flag ? `${safeRegion} ${flag}` : safeRegion;\n};\n\nconst defaultBar = String.fromCharCode(9617).repeat(10);\n\nreturn $input.all().map((item) => {\n  const job = item.json;\n  const regions = (job.regions || [])\n    .map((region) => String(region).trim())\n    .filter(Boolean);\n  const regionLines = (regions.length ? regions : [job.primaryLocation || 'Worldwide'])\n    .map((region) => formatRegion(region));\n  const links = (job.jobUrls || [])\n    .slice(0, 8)\n    .map((url, index) => `<a href=\"${escapeUrl(url)}\">Open posting ${index + 1}</a>`);\n\n  const scoreValue = Number.isFinite(Number(job.fitScore)) ? String(Math.round(Number(job.fitScore))) : '?';\n  const scoreBar = String(job.fitScoreBar || defaultBar);\n  const minFitScore = Number.isFinite(Number(job.minFitScore)) ? Math.round(Number(job.minFitScore)) : 7;\n\n  const messageLines = [\n    `${ICONS.alert} <b>New LinkedIn Job Opportunity</b>`,\n    '',\n    `${ICONS.role} <b>Role:</b> ${escapeHtml(job.title || 'Unknown role')}`,\n    `${ICONS.company} <b>Company:</b> ${escapeHtml(job.company || 'Unknown company')}`,\n    `${ICONS.fit} <b>Fit Score:</b> ${escapeHtml(scoreBar)} ${escapeHtml(`${scoreValue}/10`)}`,\n  ];\n\n  if (job.fitSummary) {\n    messageLines.push(`${ICONS.note} <b>Fit note:</b> ${escapeHtml(job.fitSummary)}`);\n  }\n\n  messageLines.push(\n    '',\n    `${ICONS.regions} <b>Regions:</b>`,\n    '',\n    ...regionLines,\n    '',\n    `${ICONS.links} <b>Merged postings:</b> ${escapeHtml(String(job.duplicateCount ?? 1))}`,\n  );\n\n  if (job.postedText) {\n    messageLines.push(`${ICONS.posted} <b>Posted:</b> ${escapeHtml(job.postedText)}`);\n  }\n\n  if (job.postedDate) {\n    messageLines.push(`${ICONS.date} <b>Posting date:</b> ${escapeHtml(job.postedDate)}`);\n  }\n\n  if (job.reasoning) {\n    messageLines.push('', `${ICONS.dedupe} <b>AI dedupe note:</b>`, escapeHtml(job.reasoning));\n  }\n\n  messageLines.push(\n    '',\n    `${ICONS.links} <b>Links:</b>`,\n    '',\n    ...(links.length ? links : ['No links captured']),\n    '',\n    `${ICONS.search} <b>Search term:</b> ${escapeHtml(job.searchTerm || 'configured keywords')}`,\n    `${ICONS.filter} <b>Filter:</b> Remote + Fit >= ${escapeHtml(String(minFitScore))}`,\n    `${ICONS.window} <b>Window:</b> Last 24h`,\n  );\n\n  return {\n    json: {\n      ...job,\n      telegramMessage: messageLines.join('\\n')\n    }\n  };\n});"
+      },
+      "id": "4110b640-e9c7-48f2-8785-a94348bcbb6a",
+      "name": "Format Telegram Alerts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3630,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Workflow Configuration').first().json.telegramChatId }}",
+        "text": "={{ $json.telegramMessage }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_web_page_preview": true,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "c03e0513-b5ce-4f45-a5fb-603aee7d3cc1",
+      "name": "Send to Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3890,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Workflow Configuration').first().json;\nconst enabled = config.easyApplyEnabled === true || String(config.easyApplyEnabled).toLowerCase() === 'true';\nconst webhookUrl = String(config.easyApplyWebhookUrl || '').trim();\nconst mode = String(config.easyApplyMode || 'fill_and_confirm').trim();\n\nif (!enabled || !webhookUrl || webhookUrl.includes('YOUR-TUNNEL-URL')) {\n  return [];\n}\n\nreturn $input.all().map((item) => {\n  const job = item.json;\n  const jobUrls = Array.isArray(job.jobUrls) ? job.jobUrls.filter(Boolean) : [];\n  const jobUrl = jobUrls[0] || job.jobUrl || '';\n  const taskId = `${job.canonicalKey || `${job.company || 'unknown'}|${job.title || 'unknown'}`}-${Date.now()}`\n    .toLowerCase()\n    .replace(/[^a-z0-9|._-]+/g, '-');\n\n  return {\n    json: {\n      easyApplyWebhookUrl: webhookUrl,\n      easyApplyMode: mode,\n      easyApplyTask: {\n        taskId,\n        canonicalKey: job.canonicalKey || '',\n        title: job.title || '',\n        company: job.company || '',\n        jobUrl,\n        jobUrls,\n        regions: job.regions || [],\n        primaryLocation: job.primaryLocation || '',\n        fitScore: job.fitScore,\n        fitBand: job.fitBand || '',\n        fitSummary: job.fitSummary || '',\n        scoringReason: job.scoringReason || '',\n        aboutTheJobText: job.aboutTheJobText || '',\n        cvPath: config.cvPath || '',\n        statusCallbackSecret: config.easyApplyStatusCallbackSecret || '',\n        mode,\n        sourceWorkflow: $workflow.name,\n        createdAt: new Date().toISOString(),\n      },\n    },\n  };\n});"
+      },
+      "id": "14084efa-59b4-42e2-95fc-8998c19663ac",
+      "name": "Prepare Easy Apply Task",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3630,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.easyApplyWebhookUrl }}",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-easy-apply-secret",
+              "value": "={{ $('Workflow Configuration').first().json.easyApplyHandoffSecret }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.easyApplyTask) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "c3ab815c-cda3-4f69-a93e-8acd31d854f4",
+      "name": "Send Easy Apply Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3890,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "easy-apply-status",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "e6a9fb83-a4db-41b7-ac30-e2f0b775eff3",
+      "name": "Easy Apply Status Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        520,
+        900
+      ],
+      "webhookId": "easy-apply-status"
+    },
+    {
+      "parameters": {
+        "jsCode": "const escapeHtml = (value = '') => String(value)\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;')\n  .replace(/\"/g, '&quot;')\n  .replace(/'/g, '&#39;');\n\nconst statusLabels = {\n  queued: 'Queued in local browser agent',\n  no_easy_apply: 'No Easy Apply button found',\n  login_required: 'LinkedIn login required',\n  unknown_questions: 'Needs your answer',\n  extra_action_required: 'Extra application action required',\n  ready_for_review: 'Ready for your review',\n  error: 'Easy Apply agent error',\n};\n\nreturn $input.all().map((item) => {\n  const expectedSecret = String(item.json.easyApplyStatusCallbackSecret || '');\n  const telegramChatId = String(item.json.telegramChatId || '');\n  const headers = item.json.headers || {};\n  const body = item.json.body || item.json;\n  const providedSecret = headers['x-easy-apply-status-secret']\n    || headers['X-Easy-Apply-Status-Secret']\n    || body.statusCallbackSecret\n    || '';\n\n  if (!expectedSecret.includes('PLACEHOLDER') && providedSecret !== expectedSecret) {\n    throw new Error('Invalid Easy Apply status callback secret.');\n  }\n\n  const status = String(body.status || 'unknown');\n  const questions = Array.isArray(body.questions) ? body.questions.filter(Boolean) : [];\n  const label = statusLabels[status] || status;\n  const lines = [\n    'Easy Apply Status',\n    '',\n    `<b>Status:</b> ${escapeHtml(label)}`,\n    `<b>Role:</b> ${escapeHtml(body.title || 'Unknown role')}`,\n    `<b>Company:</b> ${escapeHtml(body.company || 'Unknown company')}`,\n  ];\n\n  if (body.message) {\n    lines.push('', `<b>Message:</b> ${escapeHtml(body.message)}`);\n  }\n\n  if (questions.length) {\n    lines.push('', '<b>Questions / actions needed:</b>');\n    for (const question of questions.slice(0, 10)) {\n      lines.push(`- ${escapeHtml(question)}`);\n    }\n  }\n\n  if (body.jobUrl) {\n    const safeUrl = String(body.jobUrl).replace(/&/g, '&amp;').replace(/\"/g, '&quot;');\n    lines.push('', `<a href=\"${safeUrl}\">Open LinkedIn posting</a>`);\n  }\n\n  return {\n    json: {\n      ...body,\n      telegramChatId,\n      telegramMessage: lines.join('\\n'),\n    },\n  };\n});"
+      },
+      "id": "79964bd1-55e2-4afd-8294-e5a0bdca34be",
+      "name": "Format Easy Apply Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.telegramChatId }}",
+        "text": "={{ $json.telegramMessage }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_web_page_preview": true,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "8759517f-a33c-4c61-8b2e-80f9e2bd7b1f",
+      "name": "Send Easy Apply Status to Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1300,
+        900
+      ],
+      "webhookId": null
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "status-cfg-secret",
+              "name": "easyApplyStatusCallbackSecret",
+              "value": "YOUR_EASY_APPLY_STATUS_CALLBACK_SECRET",
+              "type": "string"
+            },
+            {
+              "id": "status-cfg-telegram-chat-id",
+              "name": "telegramChatId",
+              "value": "YOUR_TELEGRAM_CHAT_ID",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "cb167432-73a8-48ee-af53-a58ccb5c69e7",
+      "name": "Easy Apply Status Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        780,
+        900
+      ]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every Hour": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Build Page Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Page Requests": {
+      "main": [
+        [
+          {
+            "node": "Fetch LinkedIn Search Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch LinkedIn Search Pages": {
+      "main": [
+        [
+          {
+            "node": "Extract Job Cards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Job Cards": {
+      "main": [
+        [
+          {
+            "node": "Prepare Jobs For AI Deduplication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Jobs For AI Deduplication": {
+      "main": [
+        [
+          {
+            "node": "AI Deduplicate Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI GPT-4o-mini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Deduplicate Jobs",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Deduplicate Jobs",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Deduplicate Jobs": {
+      "main": [
+        [
+          {
+            "node": "Expand AI Deduped Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Expand AI Deduped Jobs": {
+      "main": [
+        [
+          {
+            "node": "Keep Only Newly Seen Opportunities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep Only Newly Seen Opportunities": {
+      "main": [
+        [
+          {
+            "node": "Fetch Job Detail Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Telegram Alerts": {
+      "main": [
+        [
+          {
+            "node": "Send to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Job Detail Page": {
+      "main": [
+        [
+          {
+            "node": "Extract About the Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract About the Job": {
+      "main": [
+        [
+          {
+            "node": "AI Score Job Fit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI GPT-4o-mini (Scoring)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Score Job Fit",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser (Scoring)": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Score Job Fit",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Score Job Fit": {
+      "main": [
+        [
+          {
+            "node": "Normalize And Filter Fit Scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize And Filter Fit Scores": {
+      "main": [
+        [
+          {
+            "node": "Format Telegram Alerts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Easy Apply Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Easy Apply Task": {
+      "main": [
+        [
+          {
+            "node": "Send Easy Apply Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Easy Apply Status Webhook": {
+      "main": [
+        [
+          {
+            "node": "Easy Apply Status Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Easy Apply Status": {
+      "main": [
+        [
+          {
+            "node": "Send Easy Apply Status to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Easy Apply Status Configuration": {
+      "main": [
+        [
+          {
+            "node": "Format Easy Apply Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {}
+}
